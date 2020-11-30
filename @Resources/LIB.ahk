@@ -8,14 +8,14 @@ IsWindowCloaked(hwnd)
 SplitPath(A_ScriptDir,, SkinDir)
 SplitPath(SkinDir,,,, SkinName)
 
-send_WM_COPYDATA(ByRef StringToSend, ByRef TargetWindowClass)
+send_WM_COPYDATA(ByRef StringToSend, ByRef TargetWindow)
 {
 	VarSetCapacity(CopyDataStruct, 3*A_PtrSize, 0)
 	SizeInBytes := (StrLen(StringToSend) + 1) * (A_IsUnicode ? 2 : 1)
 	NumPut(1, CopyDataStruct)
 	NumPut(SizeInBytes, CopyDataStruct, A_PtrSize)
 	NumPut(&StringToSend, CopyDataStruct, 2*A_PtrSize)
-	SendMessage(0x4a, 0, &CopyDataStruct,, "ahk_class " TargetWindowClass)
+	SendMessage(0x4a, 0, &CopyDataStruct,, TargetWindow)
 	return ErrorLevel
 }
 
@@ -23,7 +23,7 @@ sendBang(command)
 {
 	Global SkinName
 	commandWrap := command " `"" SkinName "`""
-	send_WM_COPYDATA(commandWrap, "ahk_class RainmeterMeterWindow")
+	send_WM_COPYDATA(commandWrap, "i)\Q" SkinDir "\taskbar.ini ahk_class RainmeterMeterWindow ahk_exe Rainmeter.exe\E")
 }
 
 hasKeyArray(array1,array2)
@@ -74,9 +74,4 @@ ReadInteger(p_address, p_offset, p_size)
 	loop(p_size)
 		value := value + (NumGet((p_address + p_offset) + (a_Index - 1),, "UChar") << (8 * (a_Index - 1)))
 	return value
-}
-
-openStart(params*)
-{
-	sendinput("{LWin}")
 }

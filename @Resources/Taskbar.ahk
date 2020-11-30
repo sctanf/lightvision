@@ -1,7 +1,9 @@
-SetTitleMatchMode "RegEx"
 #Persistent
 #SingleInstance force
 #NoTrayIcon
+ListLines(0)
+DetectHiddenWindows(1)
+SetTitleMatchMode("RegEx")
 ProcessSetPriority("Realtime")
 CoordMode "Mouse", "Screen"
 #Include GDIP.ahk
@@ -11,21 +13,98 @@ OnMessage(5100, "sortWindows")
 OnMessage(5202, "taskControl")
 OnMessage(5201, "taskItemMenu")
 OnMessage(5200, "taskSwitch")
-OnMessage(5000, "openStart")
-OnMessage(5300, "trayOpen")
 OnMessage(5400, "getWindows")
 OnMessage(10000, "exit")
 OnExit("exit")
+
 iconDir := A_Temp "\anfTaskbarIcons\"
 DirCreate(iconDir)
 ;Prevent Rainmeter from taking focus
-WinSetExStyle(+0x8000080, "i)\Q" SkinDir "\taskbar.ini\E")
+WinSetExStyle(+0x8000080, "i)\Q" SkinDir "\taskbar.ini ahk_class RainmeterMeterWindow ahk_exe Rainmeter.exe\E")
 WinMoveTop()
 WinSetAlwaysOnTop(1)
 
 ;Hide taskbar
 WinHide "ahk_class Shell_TrayWnd"
 WinHide "Start ahk_class Button"
+
+selectedTask := ""
+ActiveHwnd := ""
+taskList := []
+lastTasks := []
+;flashingIds := Map()
+;DllCall("RegisterShellHookWindow", "Ptr", A_ScripthWnd)
+;OnMessage(DllCall("RegisterWindowMessage", "Str", "SHELLHOOK"), "ShellMessage")
+;lastWindows := WinGetList(,, "Program Manager")
+
+Loop 50
+{
+	sendBang("!SetOption " A_Index " Text `"`"")
+	sendBang("!SetOption " A_Index " ToolTipTitle `"`"")
+	sendBang("!SetOption " A_Index " ToolTipText `"`"")
+	sendBang("!SetOption " A_Index " Group `"Task|TextAuto|Hide`"")
+}
+
+if (A_IsCompiled)
+{
+	WinSetTitle(A_ScriptFullPath, "ahk_id " A_ScriptHwnd)
+	sendBang("!SetOption AHK WindowName `"" A_ScriptFullPath "`"")
+}
+else
+	sendBang("!SetOption AHK WindowName `"" A_ScriptFullPath " - AutoHotkey v" A_AhkVersion "`"")
+sendBang("!UpdateMeasure `"AHK`"")
+
+;SetTimer("updateWindows", 50)
+SetTimer("power", 1000)
+SetTimer("network", 1000)
+;SetTimer("taskbarState", 50)
+
+getWindows()
+
+hover := 0
+While WinExist("i)\Q" SkinDir "\taskbar.ini ahk_class RainmeterMeterWindow ahk_exe Rainmeter.exe\E")
+{
+	WinSetTransparent(0, "ahk_class Shell_TrayWnd")
+	MouseGetPos(, mY)
+	Width := 0
+	Height := 0
+	WinGetPos(,, Width, Height, "ahk_id " WinGetID("A"),, "NxDock|Program Manager|Task Switching|^$")
+	if ((Width != A_ScreenWidth) | (Height != A_ScreenHeight))
+	{
+		if (mY = A_ScreenHeight - 1 && hover == 0)
+		{
+			hover := 1
+			if ((Width != A_ScreenWidth) | (Height != A_ScreenHeight))
+			{
+				sendBang("!SetOptionGroup TextAuto Y 0")
+				sendBang("!UpdateMeterGroup TextAuto")
+				sendBang("!SetOptionGroup IconAuto Y 5")
+				sendBang("!UpdateMeterGroup IconAuto")
+				sendBang("!Redraw")
+				;sendBang("!UnpauseMeasure MeasureSec")
+				;sendBang("!UpdateMeasure MeasureSec")
+				;sendBang("!Move 0 " A_ScreenHeight - 15)
+			}
+		}
+		else if (mY < A_ScreenHeight - 16 && hover == 1)
+		{
+			hover := 0
+			sendBang("!SetOptionGroup TextAuto Y 15")
+			sendBang("!UpdateMeterGroup TextAuto")
+			sendBang("!SetOptionGroup IconAuto Y 20")
+			sendBang("!UpdateMeterGroup IconAuto")
+			sendBang("!Redraw")
+			;sendBang("!PauseMeasure MeasureSec")
+			;sendBang("!Hide")
+			;sendBang("!Move 0 " A_ScreenHeight)
+		}
+		sendBang("!Show")
+	}
+	else
+		sendBang("!Hide")
+	Sleep 100
+}
+ExitApp
 
 loadIconCache(iconDir)
 {
@@ -74,7 +153,6 @@ sortWindows(wParam, lParam, *)
 		DllCall("TileWindows", "UInt",0, "Int",1, "Int",0, "Int",0, "Int",0)
 }
 
-selectedTask := ""
 taskItemMenu(wParam, lParam, *)
 {
 	Global taskList
@@ -89,7 +167,6 @@ taskItemMenu(wParam, lParam, *)
 	menuTaskItem.Show
 }
 
-ActiveHwnd := ""
 taskSwitch(wParam, lParam, *)
 { 
 	Global taskList
@@ -176,9 +253,6 @@ getIconHandle(taskExePath){
 		return NumGet(fileInfo, 0, "Ptr")
 }
 
-taskList := []
-lastTasks := []
-;flashingIds := Map()
 getWindows(*)
 {
 	Global lastTasks
@@ -187,7 +261,9 @@ getWindows(*)
 	;Global flashingIds
 	iconCache := loadIconCache(iconDir)
 	colorCache := loadColorCache(iconDir)
+	DetectHiddenWindows(0)
 	id := WinGetList(,, "NxDock|Program Manager|Task Switching|^$")
+	DetectHiddenWindows(1)
 	activeTask := ""
 	activeID := WinGetID("A")
 	flashingTasks := Map()
@@ -253,7 +329,7 @@ getWindows(*)
 		sendBang("!SetOption " A_Index " Text `"`"`"" OutNameNoExt "`"`"`"")
 		sendBang("!SetOption " A_Index " X `"1R`"")
 		sendBang("!SetOption " A_Index " ToolTipText `"`"`"" thisTitle "`"`"`"")
-		sendBang("!SetOption " A_Index " Group `"Task|Show`"")
+		sendBang("!SetOption " A_Index " Group `"Task|TextAuto|Show`"")
 		lastTask := OutNameNoExt
 	}
 	Try if (lastTasks.Length > taskList.Length)
@@ -263,7 +339,7 @@ getWindows(*)
 			sendBang("!SetOption " (A_Index + taskList.Length) " Text `"`"")
 			sendBang("!SetOption " (A_Index + taskList.Length) " X `"R`"")
 			sendBang("!SetOption " (A_Index + taskList.Length) " ToolTipText `"`"")
-			sendBang("!SetOption " (A_Index + taskList.Length) " Group `"Task|Hide`"")
+			sendBang("!SetOption " (A_Index + taskList.Length) " Group `"Task|TextAuto|Hide`"")
 		}
 	}
 	sendBang("!UpdateMeterGroup Task")
@@ -288,8 +364,6 @@ getWindows(*)
 	lastTasks := taskList
 }
 
-;DllCall("RegisterShellHookWindow", "Ptr", A_ScripthWnd)
-;OnMessage(DllCall("RegisterWindowMessage", "Str", "SHELLHOOK"), "ShellMessage")
 ;ShellMessage(wParam, lParam, *)
 ;{
 ;	Global flashingIds
@@ -300,7 +374,6 @@ getWindows(*)
 ;	}
 ;}
 
-;lastWindows := WinGetList(,, "Program Manager")
 ;updateWindows()
 ;{
 ;	Global curWindows
@@ -346,76 +419,3 @@ getWindows(*)
 ;				activeFull := 1
 ;	}
 ;}
-
-trayOpen(wParam, lParam, *)
-{
-	DetectHiddenWindows 1
-	SetControlDelay -1
-	SetWinDelay 0
-	ControlClick "Button2", "ahk_class Shell_TrayWnd",,,, "NA"
-	if WinWait("ahk_class NotifyIconOverflowWindow",, 3) {
-		Sleep 100
-		WinActivate("ahk_class NotifyIconOverflowWindow")
-		While WinActive("ahk_class NotifyIconOverflowWindow")
-		{
-			Sleep 100
-			WinGetPos x,y, WidthOfTray, HeightOfTray, "ahk_class NotifyIconOverflowWindow"
-			TrueX := A_ScreenWidth - WidthOfTray
-			TrueY := A_ScreenHeight - HeightOfTray
-			WinMove TrueX, TrueY,,, "ahk_class NotifyIconOverflowWindow"
-		}
-		;WinHide("ahk_class NotifyIconOverflowWindow")
-		Return
-	}
-	else
-		Return
-}
-
-Loop 50
-{
-	sendBang("!SetOption " A_Index " Text `"`"")
-	sendBang("!SetOption " A_Index " ToolTipTitle `"`"")
-	sendBang("!SetOption " A_Index " ToolTipText `"`"")
-	sendBang("!SetOption " A_Index " Group `"Task|Hide`"")
-}
-
-if (A_IsCompiled)
-{
-	WinSetTitle(A_ScriptFullPath, "ahk_id " A_ScriptHwnd)
-	sendBang("!SetOption AHK WindowName `"" A_ScriptFullPath "`"")
-}
-else
-	sendBang("!SetOption AHK WindowName `"" A_ScriptFullPath " - AutoHotkey v" A_AhkVersion "`"")
-sendBang("!UpdateMeasure `"AHK`"")
-
-;SetTimer("updateWindows", 50)
-SetTimer("power", 1000)
-SetTimer("network", 1000)
-;SetTimer("taskbarState", 50)
-
-hover := 0
-Loop
-{
-	WinSetTransparent(0, "ahk_class Shell_TrayWnd")
-	MouseGetPos(, mY)
-	if (mY = A_ScreenHeight - 1 && hover == 0)
-	{
-		hover := 1
-		WinGetPos(,, Width, Height, "A",, "NxDock|Program Manager|Task Switching|^$")
-		if ((Width != A_ScreenWidth) & (Height != A_ScreenHeight))
-		{
-			sendBang("!UnpauseMeasure MeasureSec")
-			sendBang("!UpdateMeasure MeasureSec")
-			sendBang("!Move 0 " A_ScreenHeight - 15)
-			sendBang("!Show")
-		}
-	}
-	else if (mY < A_ScreenHeight - 16 && hover == 1)
-	{
-		hover := 0
-		sendBang("!PauseMeasure MeasureSec")
-		sendBang("!Hide")
-		sendBang("!Move 0 " A_ScreenHeight)
-	}
-	Sleep 15
-}
