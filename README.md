@@ -21,4 +21,7 @@ If you want to use Spotify, you need to use khanhas's [Spicetify](https://github
 
 ---
 
-Inspiration and/or some AHK code from Jon Seppanen's [RainTaskbar](https://github.com/jonseppanen/RainTaskbar) and [Raindock](https://github.com/jonseppanen/Raindock) :>
+**Credits**
+- Inspiration and/or some AHK code from Jon Seppanen's [RainTaskbar](https://github.com/jonseppanen/RainTaskbar) and [Raindock](https://github.com/jonseppanen/Raindock) :>
+- tjhrulz - [WebNowPlaying plugin](https://github.com/tjhrulz/WebNowPlaying) and [GPMDP plugin](https://github.com/tjhrulz/GPMDP-Plugin)
+- Socks The Fox - [Chameleon plugin](https://github.com/socks-the-fox/Chameleon)
