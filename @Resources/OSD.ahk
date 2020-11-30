@@ -8,7 +8,7 @@ ProcessSetPriority("Realtime")
 OnMessage(5000, "CheckOSD")
 OnMessage(10000, "exit")
 SplitPath(A_ScriptDir,, SkinDir)
-SplitPath(SkinDir,,,, SkinName)
+SplitPath(SkinDir, SkinName)
 
 send_WM_COPYDATA(ByRef StringToSend, ByRef TargetWindow)
 {
