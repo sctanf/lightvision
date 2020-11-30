@@ -61,10 +61,11 @@ exit(*)
 	DirDelete(iconDir, 1)
 	Gdip_Shutdown(pToken)
 	;DllCall("RegisterShellHookWindow", "Ptr", A_ScripthWnd)
-	;WinSetTransparent(255, "ahk_class Shell_TrayWnd")
-	WinSetTransparent(Off, "ahk_class Shell_TrayWnd")
+	DetectHiddenWindows(1)
 	WinShow "ahk_class Shell_TrayWnd"
 	WinShow "Start ahk_class Button"
+	WinSetTransparent(255, "ahk_class Shell_TrayWnd")
+	WinSetTransparent(Off, "ahk_class Shell_TrayWnd")
 	ExitApp
 }
 
