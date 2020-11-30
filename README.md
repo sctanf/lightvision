@@ -1,4 +1,4 @@
-# lightvison
+# lightvision
 
 [!["GitHub release (latest by date)"](https://img.shields.io/github/v/release/sctanf/lightvison?style=flat-square)](https://github.com/sctanf/lightvison/releases/latest) 
 [![GitHub All Releases](https://img.shields.io/github/downloads/sctanf/lightvison/total?style=flat-square)](https://github.com/sctanf/lightvison/releases)
