@@ -5,6 +5,7 @@ ListLines(0)
 DetectHiddenWindows(1)
 SetTitleMatchMode("RegEx")
 ProcessSetPriority("Realtime")
+OnMessage(5000, "CheckOSD")
 OnMessage(10000, "exit")
 SplitPath(A_ScriptDir,, SkinDir)
 SplitPath(SkinDir,,,, SkinName)
@@ -65,3 +66,8 @@ sendBang("!SetOption Volume Text `"" round(SoundGetVolume()) "`"")
 sendBang("!UpdateMeter Volume")
 sendBang("!CommandMeasure Processor OSDStateChange()")
 return
+
+CheckOSD(*)
+{
+	SendInput("{Volume_Mute}{Volume_Mute}")
+}
