@@ -6,7 +6,7 @@ IsWindowCloaked(hwnd)
 }
 
 SplitPath(A_ScriptDir,, SkinDir)
-SplitPath(SkinDir,,,, SkinName)
+SplitPath(SkinDir, SkinName)
 
 send_WM_COPYDATA(ByRef StringToSend, ByRef TargetWindow)
 {
