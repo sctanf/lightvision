@@ -5,3 +5,7 @@
 
 Clean up Windows by simply replacing crucial parts of it with inferior solutions!
 Lightvision replaces things with Rainmeter and AutoHotKey instead.
+
+---
+
+Inspiration and/or some AHK code from Jon Seppanen's [RainTaskbar](https://github.com/jonseppanen/RainTaskbar) and [Raindock](https://github.com/jonseppanen/Raindock) :>
