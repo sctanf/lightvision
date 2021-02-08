@@ -14,6 +14,7 @@ OnMessage(5202, "taskControl")
 OnMessage(5201, "taskItemMenu")
 OnMessage(5200, "taskSwitch")
 OnMessage(5400, "getWindows")
+OnMessage(6000, "keepAlive")
 OnMessage(10000, "exit")
 OnExit("exit")
 
@@ -27,6 +28,8 @@ WinSetAlwaysOnTop(1)
 ;Hide taskbar
 WinHide "ahk_class Shell_TrayWnd"
 WinHide "Start ahk_class Button"
+
+alive := false
 
 selectedTask := ""
 ActiveHwnd := ""
@@ -54,6 +57,7 @@ else
 	sendBang("!SetOption AHK WindowName `"" A_ScriptFullPath " - AutoHotkey v" A_AhkVersion "`"")
 sendBang("!UpdateMeasure `"AHK`"")
 
+SetTimer("watchdog", 5000)
 ;SetTimer("updateWindows", 50)
 SetTimer("power", 1000)
 SetTimer("network", 1000)
@@ -105,6 +109,32 @@ While WinExist("i)\Q" SkinDir "\taskbar.ini ahk_class RainmeterMeterWindow ahk_e
 	Sleep 100
 }
 ExitApp
+
+watchdog()
+{
+	Global alive
+	if (alive)
+		alive := false
+	else
+	{
+		try
+		{
+			RunWait("taskkill /IM Rainmeter.exe /F",,"Hide")
+			Run("`"C:\Program Files\Rainmeter\Rainmeter.exe`"",,"Hide")
+		}
+		catch
+			if MsgBox("Watchdog Failed!", "Rainmeter - Lightvision", "0x40015") = "Retry"
+				watchdog()
+			else
+				exit()
+	}
+}
+
+keepAlive(*)
+{
+	Global alive
+	alive := true
+}
 
 loadIconCache(iconDir)
 {
